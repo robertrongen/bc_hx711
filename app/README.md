@@ -4,7 +4,7 @@ Test application for HX711 library for BigClown modules
 
 |Project components |
 |-|
-|[BigClown Core module](https://developers.hardwario.com/hardware/about-core-module) |
+|[BigClown Core module](https://developers.hardwario.com/hardware/about-core-module) REL v1 and v2 supported |
 |[Battery module](https://developers.hardwario.com/hardware/about-battery-module)  |
 |[LCD module](https://developers.hardwario.com/hardware/about-lcd-module)   |
 |[HX711 module](https://arduino-shop.cz/arduino/998-ad-prevodnik-modul-24-bit-2-kanaly-hx711.html) 24bit A/D Converter for weight scales |
