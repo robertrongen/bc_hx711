@@ -18,18 +18,22 @@
 #include <bc_usb_cdc.h>
 #include <bc_eeprom.h>
 
+#define HX711_INVALID_VALUE -99999999
 #define _HX711_TIMES 5
 #define _HX711_MEM_ADDRESS 0
+
 
 // HX711 scale modlule configuration
 typedef struct hx711_t hx711_t;
 
 
 // channels of HX711 decoder
+// the number corresponds to gain on selected channel. 
+// Channel B is fix set to 32, Chnnel A can be set to 128 and 64 
 typedef enum {
     HX711_CHANNEL_A = 128,
-    HX711_CHANNEL_B = 32,
-    HX711_CHANNEL_A64 = 64
+    HX711_CHANNEL_A64 = 64,
+    HX711_CHANNEL_B = 32
 } hx711_channel_t;
 
 
@@ -64,12 +68,12 @@ struct hx711_t
 {
     bc_gpio_channel_t _PD_SCK;  // Power Down and Serial Clock Input Pin
     bc_gpio_channel_t _DOUT;    // Serial Data Output Pin
-    uint8_t _gain;    // amplification factor
-    long _offset;  // used for tare weight
-    float _scale;  // used to return weight in grams, kg, ounces, whatever
+    uint8_t _gain;              // amplification factor
+    long _offset;               // used for tare weight
+    float _scale;               // used to return weight in grams, kg, ounces, whatever
     hx711_state_t _state;
 
-    uint8_t _times; // number of measurements to return value
+    uint8_t _times;             // number of measurements to return value
 
     bc_scheduler_task_id_t _task_id_interval;
     bc_tick_t _update_interval;
@@ -111,11 +115,10 @@ long hx711_read_raw(hx711_t *self);
 // returns an average reading; times = how many times to read
 long hx711_read_raw_average(hx711_t *self, uint8_t times );
 
-// returns (read_average() - OFFSET), that is the current value without the tare weight; times = how many readings to do
+// returns (read_average() - OFFSET), that is the current value without the tare weight; 
 double hx711_get_value(hx711_t *self);
 
 // returns get_value() divided by SCALE, that is the raw value divided by a value obtained via calibration
-// times = how many readings to do
 float hx711_get_units(hx711_t *self);
 
 // measure the value and call the registered event handler

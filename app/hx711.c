@@ -84,7 +84,7 @@ long _hx711_read_raw_internal(hx711_t *self)
 
   // Wait for the chip to become ready.
   if (!hx711_wait_ready_retry(self, 3, 1))
-    return -9223372036854775808;
+    return HX711_INVALID_VALUE;
 
   // Define structures for reading data into.
   unsigned long value = 0;
@@ -242,6 +242,7 @@ void hx711_set_update_interval(hx711_t *self, bc_tick_t interval)
     else
     {
         bc_scheduler_plan_relative(self->_task_id_interval, self->_update_interval);
+        self->_hybernate = (interval>1000)?true:false;
     }
 
     _hx711_log("interval set");
