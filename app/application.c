@@ -218,6 +218,7 @@ void lcd_init(){
     bc_module_lcd_clear();
     bc_module_lcd_set_font(&bc_font_ubuntu_24);
     bc_module_lcd_draw_string(35, 25, "Clown", true);
+    bc_module_lcd_draw_string(40, 50, "Scale", true);
     bc_module_lcd_set_font(&bc_font_ubuntu_13);
     bc_module_lcd_draw_string(30, 100, "(C) 2020 Matej", true);    
     bc_module_lcd_update();

@@ -1,6 +1,7 @@
 
 obj/
 out/
+sdk/
 .vscode/
 .DS_Store
 firmware.bin 
