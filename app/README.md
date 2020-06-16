@@ -1,6 +1,8 @@
 # Clown Scale
 
-Test application for HX711 library for BigClown modules
+Test application for HX711 library for BigClown modules.
+
+Visit [Hacksters.io](https://www.hackster.io/matejus/clown-scales-13d6cb) to read the story.
 
 |Project components |
 |-|
