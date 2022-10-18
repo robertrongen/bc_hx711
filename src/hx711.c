@@ -20,8 +20,8 @@ void _hx711_delay(long ms)
 {
   if (ms<=0)
     return;
-  bc_tick_t t = bc_tick_get()+ms;
-  while (bc_tick_get()<t)
+  twr_tick_t t = twr_tick_get()+ms;
+  while (twr_tick_get()<t)
   {
     continue;
   }
@@ -34,9 +34,9 @@ void _hx711_log(char* message)
   // for testing prposes
   char buffer[100];
   sprintf(buffer, "log:> %s\r\n", message);
-  bc_usb_cdc_write(buffer, strlen(buffer));
+  twr_usb_cdc_write(buffer, strlen(buffer));
   #else
-  bc_log_info("log:> %s\r\n", message);
+  twr_log_info("log:> %s\r\n", message);
   #endif
   #endif
 }
@@ -45,8 +45,8 @@ void _hx711_check(hx711_t *self)
 {
   #ifdef LIB_DEBUG 
   // for testing purposes
-  int sck = bc_gpio_get_output(self->_PD_SCK);
-  int dout = bc_gpio_get_input(self->_DOUT);
+  int sck = twr_gpio_get_output(self->_PD_SCK);
+  int dout = twr_gpio_get_input(self->_DOUT);
   char msg[50];
   sprintf(msg, "check CLOCK=%d; INPUT=%d", sck, dout);
   _hx711_log(msg);
@@ -60,17 +60,17 @@ void _hx711_check(hx711_t *self)
 // - https://github.com/bogde/HX711/issues/75
 // - https://github.com/arduino/Arduino/issues/6561
 // - https://community.hiveeyes.org/t/using-bogdans-canonical-hx711-library-on-the-esp32/539
-uint8_t _hx711_shiftInSlow(bc_gpio_channel_t dataPin, bc_gpio_channel_t clockPin) 
+uint8_t _hx711_shiftInSlow(twr_gpio_channel_t dataPin, twr_gpio_channel_t clockPin) 
 {
     uint8_t value = 0;
     uint8_t i;
 
     for(i = 0; i < 8; ++i) 
     {
-        bc_gpio_set_output(clockPin, 1);
+        twr_gpio_set_output(clockPin, 1);
         _hx711_delay(_HX711_CLOCK);
-        value |= bc_gpio_get_input(dataPin) << (7 - i);
-        bc_gpio_set_output(clockPin, 0);
+        value |= twr_gpio_get_input(dataPin) << (7 - i);
+        twr_gpio_set_output(clockPin, 0);
         _hx711_delay(_HX711_CLOCK);
     }
     return value;
@@ -79,8 +79,8 @@ uint8_t _hx711_shiftInSlow(bc_gpio_channel_t dataPin, bc_gpio_channel_t clockPin
 long _hx711_read_raw_internal(hx711_t *self) 
 {
   // setup clock to 0 when is changed
-  if (bc_gpio_get_output(self->_PD_SCK)==1)
-    bc_gpio_set_output(self->_PD_SCK, 0);
+  if (twr_gpio_get_output(self->_PD_SCK)==1)
+    twr_gpio_set_output(self->_PD_SCK, 0);
 
   // Wait for the chip to become ready.
   if (!hx711_wait_ready_retry(self, 3, 1))
@@ -117,9 +117,9 @@ long _hx711_read_raw_internal(hx711_t *self)
   // Set the channel and the gain factor for the next reading using the clock pin.
   for (unsigned int i = 0; i < self->_gain; i++) 
   {
-    bc_gpio_set_output(self->_PD_SCK, 1);
+    twr_gpio_set_output(self->_PD_SCK, 1);
     _hx711_delay(_HX711_CLOCK);
-    bc_gpio_set_output(self->_PD_SCK, 0);
+    twr_gpio_set_output(self->_PD_SCK, 0);
     _hx711_delay(_HX711_CLOCK);
   }
 
@@ -170,7 +170,7 @@ void _hx711_task_interval(void *param)
   _hx711_log("interval task");
   _measure_internal(self, HX711_EVENT_UPDATE);
 
-  bc_scheduler_plan_current_relative(self->_update_interval);
+  twr_scheduler_plan_current_relative(self->_update_interval);
 }
 
 // set the gain factor; takes effect only after a call to read()
@@ -195,27 +195,27 @@ void _hx711_set_gain(hx711_t *self, hx711_channel_t channel)
 
 
 
-void hx711_init(hx711_t *self, bc_gpio_channel_t dout, bc_gpio_channel_t pd_sck, hx711_channel_t channel) 
+void hx711_init(hx711_t *self, twr_gpio_channel_t dout, twr_gpio_channel_t pd_sck, hx711_channel_t channel) 
 {
   #ifdef LIB_DEBUG
   #ifdef COREv1
-  bc_usb_cdc_init();
+  twr_usb_cdc_init();
   #endif
   #endif
 
   self->_PD_SCK = pd_sck;
   self->_DOUT = dout;
 
-  bc_gpio_init(self->_PD_SCK);
-  bc_gpio_set_mode(self->_PD_SCK, BC_GPIO_MODE_OUTPUT);
-  bc_gpio_init(self->_DOUT);
-  bc_gpio_set_mode(self->_DOUT, BC_GPIO_MODE_INPUT);
-  bc_gpio_set_pull(self->_DOUT, BC_GPIO_PULL_UP);
+  twr_gpio_init(self->_PD_SCK);
+  twr_gpio_set_mode(self->_PD_SCK, TWR_GPIO_MODE_OUTPUT);
+  twr_gpio_init(self->_DOUT);
+  twr_gpio_set_mode(self->_DOUT, TWR_GPIO_MODE_INPUT);
+  twr_gpio_set_pull(self->_DOUT, TWR_GPIO_PULL_UP);
 
 
   _hx711_set_gain(self, channel);
 
-  self->_task_id_interval = bc_scheduler_register(_hx711_task_interval, self, BC_TICK_INFINITY);
+  self->_task_id_interval = twr_scheduler_register(_hx711_task_interval, self, TWR_TICK_INFINITY);
   self->_times = _HX711_TIMES;
   self->_scale = 1;
   self->_hybernate = false;
@@ -231,17 +231,17 @@ void hx711_set_event_handler(hx711_t *self, void (*event_handler)(hx711_t *, hx7
   _hx711_log("event handler set");
 }
 
-void hx711_set_update_interval(hx711_t *self, bc_tick_t interval)
+void hx711_set_update_interval(hx711_t *self, twr_tick_t interval)
 {
     self->_update_interval = interval;
 
-    if (self->_update_interval == BC_TICK_INFINITY)
+    if (self->_update_interval == TWR_TICK_INFINITY)
     {
-        bc_scheduler_plan_absolute(self->_task_id_interval, BC_TICK_INFINITY);
+        twr_scheduler_plan_absolute(self->_task_id_interval, TWR_TICK_INFINITY);
     }
     else
     {
-        bc_scheduler_plan_relative(self->_task_id_interval, self->_update_interval);
+        twr_scheduler_plan_relative(self->_task_id_interval, self->_update_interval);
         self->_hybernate = (interval>1000)?true:false;
     }
 
@@ -250,7 +250,7 @@ void hx711_set_update_interval(hx711_t *self, bc_tick_t interval)
 
 bool hx711_is_ready(hx711_t *self) 
 {
-   return bc_gpio_get_input(self->_DOUT) == 0;
+   return twr_gpio_get_input(self->_DOUT) == 0;
 }
 
 
@@ -287,8 +287,8 @@ bool hx711_wait_ready_timeout(hx711_t *self, unsigned long timeout, unsigned lon
 {
   // Wait for the chip to become ready until timeout.
   // https://github.com/bogde/HX711/pull/96
-  bc_tick_t millisStarted = bc_tick_get();
-  while (bc_tick_get() - millisStarted < timeout) 
+  twr_tick_t millisStarted = twr_tick_get();
+  while (twr_tick_get() - millisStarted < timeout) 
   {
     if (hx711_is_ready(self)) 
     {
@@ -417,9 +417,9 @@ uint8_t hx711_get_reads(hx711_t *self)
 // turn of the scales
 void hx711_power_down(hx711_t *self) 
 {
-    bc_gpio_set_output(self->_PD_SCK, 0);
+    twr_gpio_set_output(self->_PD_SCK, 0);
     _hx711_delay(0);
-    bc_gpio_set_output(self->_PD_SCK, 1);
+    twr_gpio_set_output(self->_PD_SCK, 1);
     _hx711_delay(5);
 
     self->_state = HX711_STATE_SLEEP;
@@ -430,7 +430,7 @@ void hx711_power_down(hx711_t *self)
 // power up scales
 void hx711_power_up(hx711_t *self) 
 {
-  bc_gpio_set_output(self->_PD_SCK, 0);
+  twr_gpio_set_output(self->_PD_SCK, 0);
   self->_state = HX711_STATE_READY;
   _hx711_log("power up");
 }
@@ -451,14 +451,14 @@ bool hx711_save(hx711_t *self)
   tmp.offset = self->_offset;
   tmp.scale = self->_scale;
   tmp.times = self->_times;
-  return bc_eeprom_write(_HX711_MEM_ADDRESS, &(tmp), sizeof(tmp));
+  return twr_eeprom_write(_HX711_MEM_ADDRESS, &(tmp), sizeof(tmp));
 }
 
 bool hx711_load(hx711_t *self)
 {
   _hx711_log("Load config - start");
   hx711_save_t tmp;
-  if (!bc_eeprom_read(_HX711_MEM_ADDRESS, &(tmp), sizeof(tmp)))
+  if (!twr_eeprom_read(_HX711_MEM_ADDRESS, &(tmp), sizeof(tmp)))
     return false;
   if (tmp.scale==0 || tmp.times<=0)
     return false;

@@ -11,12 +11,12 @@
 #ifndef _HX711_H
 #define _HX711_H
 
-#include <bc_gpio.h>
-#include <bc_tick.h>
-#include <bc_timer.h>
-#include <bc_scheduler.h>
-#include <bc_usb_cdc.h>
-#include <bc_eeprom.h>
+#include <twr_gpio.h>
+#include <twr_tick.h>
+#include <twr_timer.h>
+#include <twr_scheduler.h>
+#include <twr_usb_cdc.h>
+#include <twr_eeprom.h>
 
 #define HX711_INVALID_VALUE -99999999
 #define _HX711_TIMES 5
@@ -66,8 +66,8 @@ typedef enum {
 // instance of the scale
 struct hx711_t
 {
-    bc_gpio_channel_t _PD_SCK;  // Power Down and Serial Clock Input Pin
-    bc_gpio_channel_t _DOUT;    // Serial Data Output Pin
+    twr_gpio_channel_t _PD_SCK;  // Power Down and Serial Clock Input Pin
+    twr_gpio_channel_t _DOUT;    // Serial Data Output Pin
     uint8_t _gain;              // amplification factor
     long _offset;               // used for tare weight
     float _scale;               // used to return weight in grams, kg, ounces, whatever
@@ -75,8 +75,8 @@ struct hx711_t
 
     uint8_t _times;             // number of measurements to return value
 
-    bc_scheduler_task_id_t _task_id_interval;
-    bc_tick_t _update_interval;
+    twr_scheduler_task_id_t _task_id_interval;
+    twr_tick_t _update_interval;
     void (*_event_handler)(hx711_t *, hx711_event_t, double, void *);
     void *_event_param;
 
@@ -90,13 +90,13 @@ struct hx711_t
 // - With a gain factor of 32, channel B is selected
 // DOUT - data output GPIO port
 // PD_SCK - power down and Serial Clock GPIO port
-void hx711_init(hx711_t *self, bc_gpio_channel_t dout, bc_gpio_channel_t pd_sck, hx711_channel_t channel);
+void hx711_init(hx711_t *self, twr_gpio_channel_t dout, twr_gpio_channel_t pd_sck, hx711_channel_t channel);
 
 // register eventhandler to be executed on update timer
 void hx711_set_event_handler(hx711_t *self, void (*event_handler)(hx711_t *, hx711_event_t, double, void *), void *event_param);
 
 // set measuring frequency
-void hx711_set_update_interval(hx711_t *self, bc_tick_t interval);
+void hx711_set_update_interval(hx711_t *self, twr_tick_t interval);
 
 // Check if HX711 is ready
 // from the datasheet: When output data is not ready for retrieval, digital output pin DOUT is high. Serial clock

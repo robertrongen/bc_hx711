@@ -5,3 +5,4 @@ sdk/
 .vscode/
 .DS_Store
 firmware.bin 
+.gitmodules
