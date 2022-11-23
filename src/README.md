@@ -23,3 +23,9 @@ To periodic measure register the event and measure period using `hx711_set_event
 You can read raw measured data, the result is 24bit number representing the measured voltage. To use the module as a scale you have to tare (set zero value) and calibrate (set vaue for known weight) your device using `hx711_tare()` and `hx711_calibrate()` methods. This configuration can be stored in EEPROM - `hx711_save()` and `hx711_load()`.
 
 To save battery use `hx711_power_down()` when you don't measure.
+
+------------------
+
+Added Sensor and button module based on https://github.com/hardwario/twr-radio-door-sensor/
+
+

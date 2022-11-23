@@ -23,7 +23,7 @@
 #define _HX711_MEM_ADDRESS 0
 
 
-// HX711 scale modlule configuration
+// HX711 scale module configuration
 typedef struct hx711_t hx711_t;
 
 
@@ -124,7 +124,7 @@ float hx711_get_units(hx711_t *self);
 // measure the value and call the registered event handler
 bool hx711_measure(hx711_t *self);
 
-// tare thr scale - set the current weiht as the OFFSET; 
+// tare thr scale - set the current weight as the OFFSET; 
 bool hx711_tare(hx711_t *self);
 
 // calibrate scale - set the SCALE value from current weight; 

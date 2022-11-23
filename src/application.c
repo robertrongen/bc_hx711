@@ -1,12 +1,12 @@
-#include <application.h>// instance
+#include <application.h>
 
 #define SCALE_FREQUENCY 10000
 
 // LED instance
-twr_led_t _led;
+twr_led_t led;
 
 // scale instance
-hx711_t scale;
+hx711_t scale;                          // HX711 scale module configuration
 float _scale_value;
 bool _scale_on = true;
 
@@ -28,7 +28,7 @@ void lcd_button_left_event_handler(twr_button_t *self, twr_button_event_t event,
 	{
         if (_rmenu_level!=0)
         {
-            // accept menu selection    
+            // accept menu selection
             _lcd_navigate(false);
         }
         else if (_scale_on)
@@ -48,7 +48,7 @@ void lcd_button_left_event_handler(twr_button_t *self, twr_button_event_t event,
             _turn_on();
         }
     }
-    
+
 }
 
 void lcd_button_right_event_handler(twr_button_t *self, twr_button_event_t event, void *event_param)
@@ -102,6 +102,7 @@ void _turn_off(){
 
     twr_usb_cdc_write("OFF\r\n",5);
 }
+
 // write measured weight
 // value - measured units will be rounded to 2 decimal digits
 void _lcd_rewrite()
@@ -111,7 +112,7 @@ void _lcd_rewrite()
     if (scale._state==HX711_STATE_INITIALIZE)
     {
         twr_module_lcd_set_font(&twr_font_ubuntu_15);
-        twr_module_lcd_draw_string(10, 40, "NOT calibrated", true);       
+        twr_module_lcd_draw_string(10, 40, "NOT calibrated", true);
     }
     else
     {
@@ -146,7 +147,7 @@ void _lcd_write_menu()
         twr_module_lcd_draw_string(MENURIGHT, 100, "Calibrate", true);
         twr_module_lcd_draw_string(MENURIGHT, 115, "Save", true);
     }
-    
+
     float volt;
     char vtxt[10];
     twr_module_battery_measure();
@@ -156,7 +157,7 @@ void _lcd_write_menu()
 }
 
 // navigate in the right menu
-// rbutton - right LCD module button pressed 
+// rbutton - right LCD module button pressed
 void _lcd_navigate(bool rbutton)
 {
     if (rbutton)
@@ -182,7 +183,8 @@ void _lcd_navigate(bool rbutton)
                 hx711_tare(&scale);
                 break;
             case 2:
-                hx711_calibrate(&scale,1);
+                hx711_calibrate(&scale,100);
+                twr_led_pulse(&led, 2000);
                 break;
             case 3:
                 hx711_save(&scale);
@@ -197,6 +199,8 @@ void _lcd_navigate(bool rbutton)
         hx711_measure(&scale);
     }
 }
+
+
 // initialize display
 void lcd_init(){
     // Initialize LCD
@@ -204,10 +208,11 @@ void lcd_init(){
 
     twr_module_lcd_clear();
     twr_module_lcd_set_font(&twr_font_ubuntu_24);
-    twr_module_lcd_draw_string(35, 25, "Clown", true);
-    twr_module_lcd_draw_string(40, 50, "Scale", true);
+    twr_module_lcd_draw_string(35, 25, "DALI", true);
+    twr_module_lcd_draw_string(30, 50, "Scale", true);
     twr_module_lcd_set_font(&twr_font_ubuntu_13);
-    twr_module_lcd_draw_string(30, 100, "(C) 2020 Matej", true);    
+    twr_module_lcd_draw_string(30, 80, "(C) 2020 Matej", true);
+    twr_module_lcd_draw_string(30, 100, "(C) 2022 DALI", true);
     twr_module_lcd_update();
 
     // Initialize LCD buttons
@@ -221,20 +226,22 @@ void lcd_init(){
 
 // initialize application
 void application_init(void){
-    // init USB
+    twr_log_init(TWR_LOG_LEVEL_DEBUG, TWR_LOG_TIMESTAMP_ABS);
+
+    // Initialize USB
     twr_usb_cdc_init();
 
-    // battery module
+    // Initialize battery
     twr_module_battery_init();
 
     // Initialize LED
-    twr_led_init(&_led, TWR_GPIO_LED, false, false);
-    twr_led_set_mode(&_led, TWR_LED_MODE_ON);
+    twr_led_init(&led, TWR_GPIO_LED, false, false);
+    twr_led_set_mode(&led, TWR_LED_MODE_ON);
 
     // initialize LCD module
     lcd_init();
 
-    // init scale
+    // initialize scale
     hx711_init(&scale, DTPIN, CLKPIN, HX711_CHANNEL_A);
     // hx711_set_reads(&scale, 3);
     // hx711_tare(&scale);
@@ -244,5 +251,6 @@ void application_init(void){
     hx711_set_update_interval(&scale, SCALE_FREQUENCY);
     hx711_set_event_handler(&scale, hx711_event_handler, NULL);
 
-    twr_led_set_mode(&_led, TWR_LED_MODE_OFF);
+    twr_led_set_mode(&led, TWR_LED_MODE_OFF);
+
 }
